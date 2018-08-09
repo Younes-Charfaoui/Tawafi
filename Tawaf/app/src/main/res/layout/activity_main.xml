@@ -4,13 +4,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:contentDescription="@null"
+
         android:scaleType="centerCrop"
         android:src="@drawable/background_kabaa" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="24dp"
+            android:fontFamily="@font/cairo_bold"
+            android:text="@string/tawafi_string"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Display2"
+            android:textColor="@android:color/white"
+            tools:ignore="RtlHardcoded" />
+
+        <Button
+            android:id="@+id/tawaf_counter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/cairo_bold"
+            android:text="@string/tawaf_counter_button_text"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:theme="@style/ButtonStyleTawaf" />
+
+        <Button
+            android:id="@+id/safa_marwa_counter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tawaf_counter_button"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/cairo_bold"
+            android:text="@string/safa_marwa_counter_button_text"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:theme="@style/ButtonStyleSafaMarwa" />
+
+    </RelativeLayout>
 
 
 </FrameLayout>
