@@ -1,5 +1,6 @@
 package me.mxcsyounes.tawaf.activities;
 
+import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,8 +18,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window window = getWindow();
-            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS ,
+            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
+
+        findViewById(R.id.tawaf_counter_button).setOnClickListener(v -> {
+            startActivity(new Intent(this, TawafActivity.class));
+        });
     }
 }
