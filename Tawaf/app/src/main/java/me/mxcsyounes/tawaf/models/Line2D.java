@@ -14,7 +14,7 @@ public class Line2D {
     public Line2D(Point2D pointOne, Point2D pointTwo) {
         this.a = pointTwo.getY() - pointOne.getY();
         this.b = pointOne.getX() - pointTwo.getX();
-        this.c = a * pointOne.getX() + b * pointOne.getY();
+        this.c = -(a * pointOne.getX() + b * pointOne.getY());
     }
 
     public float getC() {
@@ -33,6 +33,10 @@ public class Line2D {
         double nominator = this.getA() * point.getX() + this.getB() * point.getY() + this.getC();
         double denominator = Math.sqrt(this.getA() * this.getA() + this.getB() * this.getB());
         return nominator / denominator;
+    }
+
+    public double getCoefficientOfGuid() {
+        return -this.a / this.b;
     }
 
     @Override
