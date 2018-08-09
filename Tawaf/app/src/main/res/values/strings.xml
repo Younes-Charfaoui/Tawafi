@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Tawaf</string>
     <string name="tawafi_string">طوّافي</string>
-    <string name="tawaf_counter_button_text">عداد الطواف</string>
-    <string name="safa_marwa_counter_button_text">عداد الصفا و المروة</string>
+    <string name="tawaf_counter_button_text">عدّاد الطواف</string>
+    <string name="safa_marwa_counter_button_text">عدّاد الصفا و المروة</string>
     <string name="number_achwat_string">عدد الأشواط</string>
     <string name="shawt_string">شوط</string>
     <string name="start_string">ابدأ</string>
