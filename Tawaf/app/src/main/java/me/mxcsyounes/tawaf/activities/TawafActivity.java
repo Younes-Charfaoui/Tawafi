@@ -4,8 +4,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,18 +12,17 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import me.mxcsyounes.tawaf.R;
 import me.mxcsyounes.tawaf.models.Line2D;
 import me.mxcsyounes.tawaf.models.Point2D;
 
-public class TawafActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class TawafActivity extends AppCompatActivity {
 
     private static final float HIJR_ISMAIL_TOP_LAT = 21.42256366f;
     private static final float HIJR_ISMAIL_TOP_LON = 39.82620367f;
@@ -51,7 +48,8 @@ public class TawafActivity extends AppCompatActivity implements GoogleApiClient.
     private int counter = 0;
     private TextView mCounterTextView, mDouaaTextView;
 
-    private GoogleApiClient mGoogleClient;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LocationCallback mLocationCallback;
 
 
     @Override
@@ -59,11 +57,23 @@ public class TawafActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tawaf);
 
-        mGoogleClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+
+                for (Location location : locationResult.getLocations()) {
+                    Log.i(TAG, "onLocationChanged: " + location.toString());
+                    Log.i(TAG, "Accuracy" + location.getAccuracy());
+                }
+
+            }
+        };
 
         mCounterTextView = findViewById(R.id.number_counter_text_view);
         mDouaaTextView = findViewById(R.id.douaa_text_view);
@@ -103,51 +113,26 @@ public class TawafActivity extends AppCompatActivity implements GoogleApiClient.
         });
     }
 
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        LocationRequest mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            // public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 55);
-            return;
-        }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleClient, mLocationRequest, this);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleClient.connect();
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(3000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 55);
+            return;
+        }
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mGoogleClient.disconnect();
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.i(TAG, "onLocationChanged: " + location.toString());
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
     }
 }
