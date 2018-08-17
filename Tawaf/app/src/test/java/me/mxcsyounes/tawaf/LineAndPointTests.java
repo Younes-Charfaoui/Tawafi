@@ -87,7 +87,6 @@ public class LineAndPointTests {
         Line2D RoknLine = new Line2D(hijrIsmailTopPoint, roknYamaniPoint);
 
         if (Math.signum(hajarLine.getCoefficientOfGuid()) > 0) {
-
             assertEquals(1, Math.signum(hajarLine.distanceToPoint(bt1)), -1);
             assertEquals(1, Math.signum(hajarLine.distanceToPoint(bt2)), -1);
             assertEquals(1, Math.signum(hajarLine.distanceToPoint(bt3)), -1);
@@ -95,6 +94,7 @@ public class LineAndPointTests {
             assertEquals(-1, Math.signum(hajarLine.distanceToPoint(at2)), -1);
             assertEquals(-1, Math.signum(hajarLine.distanceToPoint(at3)), -1);
         } else {
+            // coefficient of hajarLine is below zero
             assertEquals(-1, Math.signum(hajarLine.distanceToPoint(bt1)), -1);
             assertEquals(-1, Math.signum(hajarLine.distanceToPoint(bt2)), -1);
             assertEquals(-1, Math.signum(hajarLine.distanceToPoint(bt3)), -1);
