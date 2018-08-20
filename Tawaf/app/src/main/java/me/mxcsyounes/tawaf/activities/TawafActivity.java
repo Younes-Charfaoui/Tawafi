@@ -1,16 +1,23 @@
 package me.mxcsyounes.tawaf.activities;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -54,13 +61,14 @@ public class TawafActivity extends AppCompatActivity {
     private LocationCallback mLocationCallback;
 
     private boolean start;
+    private int initState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tawaf);
         mGlobalState = new State();
-
+        initState = 33;
         start = false;
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -74,6 +82,7 @@ public class TawafActivity extends AppCompatActivity {
                 }
 
                 for (Location location : locationResult.getLocations()) {
+                    Log.i(TAG, "onLocationResult: " + location.toString());
                     if (start)
                         checkLocation(location);
                 }
@@ -89,10 +98,31 @@ public class TawafActivity extends AppCompatActivity {
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
 
-        findViewById(R.id.start_counter_button).setOnClickListener(v -> {
+        findViewById(R.id.start_counter_button).setOnClickListener(view -> {
+            final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (manager != null)
+                if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    turnOnGpsDialog();
+                    return;
+                }
+
+            view.setVisibility(View.GONE);
+            findViewById(R.id.ad3iya_text_view).setVisibility(View.VISIBLE);
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            mFusedLocationClient.getLastLocation().
+                    addOnSuccessListener(this, location -> {
+                        Point2D point2D = new Point2D(Float.parseFloat(Double.toString(location.getLatitude())),
+                                Float.parseFloat(Double.toString(location.getLongitude())));
+                        State state = new State((int) Math.signum(hajarLine.distanceToPoint(point2D)),
+                                (int) Math.signum(RoknLine.distanceToPoint(point2D)));
+
+                        initState = state.getState();
+                    });
             start = true;
-//            counter++;
-//
+
 //            mCounterTextView.setText(String.valueOf(counter));
 //            switch (counter) {
 //                case 1:
@@ -120,29 +150,53 @@ public class TawafActivity extends AppCompatActivity {
         });
     }
 
+    private void turnOnGpsDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("You have to enable GPS ?");
+        builder.setCancelable(false).setPositiveButton("Yes", (dialogInterface, i) -> {
+            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+        }).setNegativeButton("No", (dialogInterface, i) -> {
+            dialogInterface.cancel();
+        }).show();
+    }
+
     State mGlobalState;
 
     private void checkLocation(Location location) {
         Log.i(TAG, "checkLocation: " + location.toString());
+        if (initState == 33) return;
         Point2D point2D = new Point2D(Float.parseFloat(Double.toString(location.getLatitude())),
                 Float.parseFloat(Double.toString(location.getLongitude())));
 
-        double stateOne = Math.signum(hajarLine.distanceToPoint(point2D));
-        double stateTwo = Math.signum(RoknLine.distanceToPoint(point2D));
-        mGlobalState.setStateHajar((int) stateOne);
-        mGlobalState.setStateRokn((int) stateTwo);
+        mGlobalState.setStateHajar((int) Math.signum(hajarLine.distanceToPoint(point2D)));
+        mGlobalState.setStateRokn((int) Math.signum(RoknLine.distanceToPoint(point2D)));
 
         switch (mGlobalState.getState()) {
             case 1:
-                // TODO: 20-Aug-18 is between and ismail top
+                if (initState == 4) {
+                    counter++;
+                    initState = 1;
+                } else if (initState != 1)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
+                // TODO: 20-Aug-18 is between hajar and ismail top
                 break;
             case 2:
+                if (initState == 1) initState = 2;
+                else if (initState != 2)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
                 // TODO: 20-Aug-18 is ismail top and ismail bottom
                 break;
             case 3:
+
+                if (initState == 2) initState = 3;
+                else if (initState != 3)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
                 // TODO: 20-Aug-18 is ismail bottom and rokn yamani
                 break;
             case 4:
+                if (initState == 3) initState = 4;
+                else if (initState != 4)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
                 // TODO: 20-Aug-18 is rokn yamani and hajar
                 break;
         }
@@ -155,7 +209,6 @@ public class TawafActivity extends AppCompatActivity {
         mLocationRequest.setInterval(3000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 

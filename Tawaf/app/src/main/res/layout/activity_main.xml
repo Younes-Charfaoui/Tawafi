@@ -35,6 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:padding="24dp"
             android:layout_marginBottom="8dp"
             android:fontFamily="@font/cairo_bold"
             android:text="@string/tawaf_counter_button_text"
@@ -44,6 +45,7 @@
         <Button
             android:id="@+id/safa_marwa_counter_button"
             android:layout_width="wrap_content"
+            android:padding="24dp"
             android:layout_height="wrap_content"
             android:layout_below="@id/tawaf_counter_button"
             android:layout_centerInParent="true"

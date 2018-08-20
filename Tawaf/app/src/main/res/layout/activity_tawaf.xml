@@ -31,7 +31,7 @@
             android:layout_gravity="center_horizontal"
             android:fontFamily="sans-serif-light"
             android:padding="-120dp"
-            android:text="0"
+            android:text="@string/_0"
             android:textColor="?colorPrimary"
             android:textSize="215sp" />
 
@@ -44,6 +44,18 @@
             android:text="@string/shawt_string"
             android:textColor="?colorPrimary"
             android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/ad3iya_text_view"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="@font/cairo_bold"
+            android:text="@string/ad3iya_string"
+            android:textColor="?colorAccent"
+            android:textSize="32sp" />
 
         <Button
             android:id="@+id/start_counter_button"

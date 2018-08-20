@@ -5,5 +5,9 @@
     <string name="safa_marwa_counter_button_text">عدّاد الصفا و المروة</string>
     <string name="number_achwat_string">عدد الأشواط</string>
     <string name="shawt_string">شوط</string>
+    <string name="ad3iya_string">ادعية</string>
+
     <string name="start_string">ابدأ</string>
+    <string name="_0">0</string>
+    <string name="somthing_wrong_happend">Something wrong is happening</string>
 </resources>
