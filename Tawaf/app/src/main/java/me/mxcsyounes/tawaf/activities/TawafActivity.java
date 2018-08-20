@@ -4,9 +4,9 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
@@ -21,6 +21,7 @@ import com.google.android.gms.location.LocationServices;
 import me.mxcsyounes.tawaf.R;
 import me.mxcsyounes.tawaf.models.Line2D;
 import me.mxcsyounes.tawaf.models.Point2D;
+import me.mxcsyounes.tawaf.models.State;
 
 public class TawafActivity extends AppCompatActivity {
 
@@ -58,6 +59,7 @@ public class TawafActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tawaf);
+        mGlobalState = new State();
 
         start = false;
 
@@ -118,17 +120,31 @@ public class TawafActivity extends AppCompatActivity {
         });
     }
 
+    State mGlobalState;
+
     private void checkLocation(Location location) {
         Log.i(TAG, "checkLocation: " + location.toString());
         Point2D point2D = new Point2D(Float.parseFloat(Double.toString(location.getLatitude())),
                 Float.parseFloat(Double.toString(location.getLongitude())));
+
         double stateOne = Math.signum(hajarLine.distanceToPoint(point2D));
         double stateTwo = Math.signum(RoknLine.distanceToPoint(point2D));
-        if (stateOne > 0 && counter != 0) {
-            counter++;
-        } else if (stateOne > 0){
-            fullState = true;
-            counter++;
+        mGlobalState.setStateHajar((int) stateOne);
+        mGlobalState.setStateRokn((int) stateTwo);
+
+        switch (mGlobalState.getState()) {
+            case 1:
+                // TODO: 20-Aug-18 is between and ismail top
+                break;
+            case 2:
+                // TODO: 20-Aug-18 is ismail top and ismail bottom
+                break;
+            case 3:
+                // TODO: 20-Aug-18 is ismail bottom and rokn yamani
+                break;
+            case 4:
+                // TODO: 20-Aug-18 is rokn yamani and hajar
+                break;
         }
     }
 
