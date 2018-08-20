@@ -25,54 +25,45 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import me.mxcsyounes.tawaf.DataProvider;
 import me.mxcsyounes.tawaf.R;
-import me.mxcsyounes.tawaf.models.Line2D;
 import me.mxcsyounes.tawaf.models.Point2D;
 import me.mxcsyounes.tawaf.models.State;
 
 public class TawafActivity extends AppCompatActivity {
 
-    private static final float HIJR_ISMAIL_TOP_LAT = 21.42256366f;
-    private static final float HIJR_ISMAIL_TOP_LON = 39.82620367f;
-
-    private static final float HIJR_ISMAIL_BOTTOM_LAT = 21.42251809f;
-    private static final float HIJR_ISMAIL_BOTTOM_LON = 39.82612991f;
-
-    private static final float ROKN_YAMANI_LAT = 21.42243943f;
-    private static final float ROKN_YAMANI_LON = 39.82618757f;
-
-    private static final float HAJAR_ASWAD_LAT = 21.42248251f;
-    private static final float HAJAR_ASWAD_LON = 39.82625463f;
-
-    private static final Point2D hijrIsmailTopPoint = new Point2D(HIJR_ISMAIL_TOP_LAT, HIJR_ISMAIL_TOP_LON);
-    private static final Point2D hijrIsmailBottomPoint = new Point2D(HIJR_ISMAIL_BOTTOM_LAT, HIJR_ISMAIL_BOTTOM_LON);
-    private static final Point2D roknYamaniPoint = new Point2D(ROKN_YAMANI_LAT, ROKN_YAMANI_LON);
-    private static final Point2D hajarAswadPoint = new Point2D(HAJAR_ASWAD_LAT, HAJAR_ASWAD_LON);
-
-    private static final Line2D hajarLine = new Line2D(hijrIsmailBottomPoint, hajarAswadPoint);
-    private static final Line2D RoknLine = new Line2D(hijrIsmailTopPoint, roknYamaniPoint);
     private static final String TAG = "Tawaf";
 
-    private int counter = 0;
-    private boolean fullState = false;
+    //counter of the rounds
+    private int mCounter = 0;
+
+    //if user tap the start button
+    private boolean mStart;
+
+    //previous state of the taif.
+    private int mPreviousState;
+
+    //object to get the state of the taif.
+    private State mGlobalState;
+
+    //text of the round and the ad3iya.
     private TextView mCounterTextView, mDouaaTextView;
 
+    //core object for getting the location.
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationCallback mLocationCallback;
 
-    private boolean start;
-    private int initState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tawaf);
+        //some basic initialization.
         mGlobalState = new State();
-        initState = 33;
-        start = false;
+        mPreviousState = 33;
+        mStart = false;
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
 
         mLocationCallback = new LocationCallback() {
             @Override
@@ -80,13 +71,11 @@ public class TawafActivity extends AppCompatActivity {
                 if (locationResult == null) {
                     return;
                 }
-
                 for (Location location : locationResult.getLocations()) {
                     Log.i(TAG, "onLocationResult: " + location.toString());
-                    if (start)
+                    if (mStart)
                         checkLocation(location);
                 }
-
             }
         };
 
@@ -116,15 +105,15 @@ public class TawafActivity extends AppCompatActivity {
                     addOnSuccessListener(this, location -> {
                         Point2D point2D = new Point2D(Float.parseFloat(Double.toString(location.getLatitude())),
                                 Float.parseFloat(Double.toString(location.getLongitude())));
-                        State state = new State((int) Math.signum(hajarLine.distanceToPoint(point2D)),
-                                (int) Math.signum(RoknLine.distanceToPoint(point2D)));
+                        State state = new State((int) Math.signum(DataProvider.getHajarLine().distanceToPoint(point2D)),
+                                (int) Math.signum(DataProvider.getRoknLine().distanceToPoint(point2D)));
 
-                        initState = state.getState();
+                        mPreviousState = state.getState();
                     });
-            start = true;
+            mStart = true;
 
-//            mCounterTextView.setText(String.valueOf(counter));
-//            switch (counter) {
+//            mCounterTextView.setText(String.valueOf(mCounter));
+//            switch (mCounter) {
 //                case 1:
 //                    mDouaaTextView.setText("لا إله إلا اللهُ وحده لا شريك له، له الملكُ وله الحمد وهو على كل شيءٍ قديرٌ");
 //                    break;
@@ -150,58 +139,6 @@ public class TawafActivity extends AppCompatActivity {
         });
     }
 
-    private void turnOnGpsDialog() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("You have to enable GPS ?");
-        builder.setCancelable(false).setPositiveButton("Yes", (dialogInterface, i) -> {
-            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-        }).setNegativeButton("No", (dialogInterface, i) -> {
-            dialogInterface.cancel();
-        }).show();
-    }
-
-    State mGlobalState;
-
-    private void checkLocation(Location location) {
-        Log.i(TAG, "checkLocation: " + location.toString());
-        if (initState == 33) return;
-        Point2D point2D = new Point2D(Float.parseFloat(Double.toString(location.getLatitude())),
-                Float.parseFloat(Double.toString(location.getLongitude())));
-
-        mGlobalState.setStateHajar((int) Math.signum(hajarLine.distanceToPoint(point2D)));
-        mGlobalState.setStateRokn((int) Math.signum(RoknLine.distanceToPoint(point2D)));
-
-        switch (mGlobalState.getState()) {
-            case 1:
-                if (initState == 4) {
-                    counter++;
-                    initState = 1;
-                } else if (initState != 1)
-                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
-                // TODO: 20-Aug-18 is between hajar and ismail top
-                break;
-            case 2:
-                if (initState == 1) initState = 2;
-                else if (initState != 2)
-                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
-                // TODO: 20-Aug-18 is ismail top and ismail bottom
-                break;
-            case 3:
-
-                if (initState == 2) initState = 3;
-                else if (initState != 3)
-                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
-                // TODO: 20-Aug-18 is ismail bottom and rokn yamani
-                break;
-            case 4:
-                if (initState == 3) initState = 4;
-                else if (initState != 4)
-                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
-                // TODO: 20-Aug-18 is rokn yamani and hajar
-                break;
-        }
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -223,4 +160,62 @@ public class TawafActivity extends AppCompatActivity {
         super.onStop();
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
     }
+
+    //helper method to let user activate the GPS
+    private void turnOnGpsDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("You have to enable GPS ?");
+        builder.setCancelable(false).setPositiveButton("Yes", (dialogInterface, i) ->
+                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
+                .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.cancel())
+                .show();
+    }
+
+    // main method that do all the work.
+    private void checkLocation(Location location) {
+        Log.i(TAG, "checkLocation: " + location.toString());
+
+        if (mPreviousState == 33) return;
+        Point2D point2D = new Point2D(Float.parseFloat(Double.toString(location.getLatitude())),
+                Float.parseFloat(Double.toString(location.getLongitude())));
+
+        mGlobalState.setStateHajar((int) Math.signum(DataProvider.getHajarLine().distanceToPoint(point2D)));
+        mGlobalState.setStateRokn((int) Math.signum(DataProvider.getRoknLine().distanceToPoint(point2D)));
+
+        switch (mGlobalState.getState()) {
+            case 1:
+                if (mPreviousState == 4) {
+                    mCounter++;
+                    mCounterTextView.setText(String.valueOf(mCounter));
+                    mPreviousState = 1;
+                    mDouaaTextView.setText("بسم الله و الله أكبر");
+                } else if (mPreviousState != 1)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
+                // TODO: 20-Aug-18 is between hajar and ismail top
+                break;
+            case 2:
+                if (mPreviousState == 1) mPreviousState = 2;
+                else if (mPreviousState != 2)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
+                // TODO: 20-Aug-18 is ismail top and ismail bottom
+                break;
+            case 3:
+
+                if (mPreviousState == 2) mPreviousState = 3;
+                else if (mPreviousState != 3)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
+                // TODO: 20-Aug-18 is ismail bottom and rokn yamani
+                break;
+            case 4:
+                if (mPreviousState == 3) mPreviousState = 4;
+                else if (mPreviousState != 4)
+                    Toast.makeText(this, R.string.somthing_wrong_happend, Toast.LENGTH_SHORT).show();
+                mDouaaTextView.setText("رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّار.");
+
+                // TODO: 20-Aug-18 is rokn yamani and hajar
+                break;
+        }
+    }
+
+
 }
