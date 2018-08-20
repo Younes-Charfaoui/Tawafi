@@ -119,6 +119,7 @@ public class TawafActivity extends AppCompatActivity {
     }
 
     private void checkLocation(Location location) {
+        Log.i(TAG, "checkLocation: " + location.toString());
         Point2D point2D = new Point2D(Float.parseFloat(Double.toString(location.getLatitude())),
                 Float.parseFloat(Double.toString(location.getLongitude())));
         double stateOne = Math.signum(hajarLine.distanceToPoint(point2D));
