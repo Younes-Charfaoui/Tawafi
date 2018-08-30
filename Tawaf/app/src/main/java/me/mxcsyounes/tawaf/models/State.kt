@@ -1,34 +1,18 @@
 package me.mxcsyounes.tawaf.models;
 
-public class State {
+data class State(var stateHajar: Int, var stateRokn: Int) {
 
-    public void setStateHajar(int stateHajar) {
-        this.stateHajar = stateHajar;
-    }
+    //no argument constructor
+    constructor() : this(0, 0)
 
-    public void setStateRokn(int stateRokn) {
-        this.stateRokn = stateRokn;
-    }
+    //function to get state in the haram
+    fun getState() =
+            if (stateHajar == 1) {
+                if (stateRokn == 1) 1
+                else 2
+            } else {
+                if (stateRokn == 1) 4
+                else 3
+            }
 
-    private int stateHajar;
-
-    public State() {
-    }
-
-    private int stateRokn;
-
-    public State(int stateHajar, int stateRokn) {
-        this.stateHajar = stateHajar;
-        this.stateRokn = stateRokn;
-    }
-
-    public int getState() {
-        if (stateHajar == 1) {
-            if (stateRokn == 1) return 1;
-            else return 2;
-        } else {
-            if (stateRokn == 1) return 4;
-            else return 3;
-        }
-    }
 }
